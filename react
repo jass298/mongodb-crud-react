@@ -1,0 +1,140 @@
+import React, { useEffect, useState } from 'react'
+import axios from 'axios';
+
+function App() {
+
+  const [eid, setEid] = useState()
+  const [ename, setEname] = useState('')
+  const [salary, setSalary] = useState()
+  const [age, setage] = useState()
+  const [list, setList] = useState([])
+
+
+
+  // fetch on load 
+  const loadData = () => {
+    fetch('http://localhost:8000/')
+      .then(res => res.json())
+      .then(data => setList(data))
+  }
+
+  useEffect(() => {
+    loadData();
+  }, [])
+
+
+
+  //submit
+  function submit(e) {
+    e.preventDefault()
+    const data = { id: eid, name: ename, salary: salary, age: age }
+    console.log('inserted...');
+
+    axios.post('http://localhost:8000/create', data)
+      .then(() => {
+        loadData();
+        resetData();
+      })
+  }
+
+
+
+  //delete
+  function Delete(e) {
+    const id = e.target.id
+    // alert(id);
+    const data = { id: id }
+    axios.post('http://localhost:8000/delete', data).then(() => {
+      loadData();
+    })
+  }
+
+  //edit
+
+  function edit(e) {
+    const selectedid = e.target.id
+    alert(selectedid);
+    const data = list.filter(item => item.id == selectedid)
+    // console.log(data);
+    setEid(data[0].id)
+    setEname(data[0].name)
+    setSalary(data[0].salary)
+    setage(data[0].age)
+
+  }
+
+  // update 
+
+  function update(e) {
+e.preventDefault();
+   const data = { id: eid, name: ename, salary: salary, age: age }
+    console.log('updated...');
+    // console.log(data);
+
+    axios.post('http://localhost:8000/update', data)
+      .then(() => {
+        console.log('running')
+        loadData();
+        resetData();
+      })
+  }
+
+
+
+  //to reset all field
+  function resetData() {
+    setEname('');
+    setSalary('');
+    setage('');
+  }
+
+
+
+  return (
+
+    <>
+      <h2>working with mongodb</h2>
+      <h3>FIll Employes's  infomation</h3>
+
+      <br /><br />
+      <form onSubmit={submit} >
+
+        Id: <input type='text' value={eid} onChange={(e) => setEid(e.target.value)} ></input>
+        Name: <input type='text' value={ename} onChange={(e) => setEname(e.target.value)} ></input>
+        Salary: <input type='text' value={salary} onChange={(e) => setSalary(e.target.value)} ></input>
+        Age: <input type='text' value={age} onChange={(e) => setage(e.target.value)} ></input>
+
+        <br /><button>save</button>
+        <button onClick={update}>Update</button>
+      </form>
+      <br /><br />
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Id</th><th> Name</th><th>Salary</th><th>Age</th> <th>Delete</th><th>Edit</th>
+
+
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((item) => (
+            <tr key={item.id}>
+
+              <td>{item.id}</td>
+              <td>{item.name}</td>
+              <td>{item.salary}</td>
+              <td>{item.age}</td>
+              <td><button id={item.id} onClick={Delete}>Delete</button></td>
+              <td><button id={item.id} onClick={edit}>Edit</button></td>
+
+
+
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  )
+}
+
+export default App
